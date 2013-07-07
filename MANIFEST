@@ -1,0 +1,9 @@
+Changes
+MANIFEST
+Makefile.PL
+README
+ReplaceBytes.xs
+lib/File/ReplaceBytes.pm
+ppport.h
+t/File-ReplaceBytes.t
+t/pod.t
