@@ -1,4 +1,4 @@
-File::ReplaceBytes - replaces arbitrary bytes in files
+File::ReplaceBytes - read or replace arbitrary data in files
 
 To install this module, use CPAN, for example:
 

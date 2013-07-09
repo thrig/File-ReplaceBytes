@@ -47,6 +47,10 @@ if ( $ExtUtils::MakeMaker::VERSION ge '6.46' ) {
 
 if ( $ExtUtils::MakeMaker::VERSION ge '6.48' ) {
   $params{MIN_PERL_VERSION} = 5.010000;
+  # TODO when was this added? or do the mauke method and build
+  # everything but only subtract things for legacy ExtUtils::MakeMaker
+  # support?
+  $params{BUILD_REQUIRES} = { 'Test::More' => 0, 'Test::Exception' => 0 };
 }
 
 WriteMakefile(%params);

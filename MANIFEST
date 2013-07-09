@@ -4,6 +4,8 @@ Makefile.PL
 README
 ReplaceBytes.xs
 lib/File/ReplaceBytes.pm
+out
 ppport.h
 t/File-ReplaceBytes.t
 t/pod.t
+t/testdata

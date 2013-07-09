@@ -7,38 +7,85 @@ use strict;
 use warnings;
 
 require Exporter;
-use AutoLoader qw(AUTOLOAD);
-
-our @ISA = qw(Exporter);
-
-our @EXPORT_OK = qw/pread pwrite todo/;
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw/pread pwrite/;
 
 our $VERSION = '0.01';
 
 require XSLoader;
 XSLoader::load( 'File::ReplaceBytes', $VERSION );
 
+# see *.xs for the code
+
 1;
 __END__
 
 =head1 NAME
 
-File::ReplaceBytes - replaces arbitrary bytes in files
+File::ReplaceBytes - read or replace arbitrary data in files
 
 =head1 SYNOPSIS
 
-  use File::ReplaceBytes;
-  TODO
+  use File::ReplaceBytes qw(pread pwrite);
+
+  open my $fh, '+<', $file or die "cannot open $file: $!\n";
+
+  # read 16 bytes at offset of 8 bytes into $buf
+  my $buf;
+  pread($fh, $buf, 16, 8);
+
+  # write these bytes out in various locations to same file
+  pwrite($fh, $buf);        # at beginning of file
+  pwrite($fh, $buf, 4);     # write just 4 bytes of $buf
+  pwrite($fh, $buf, 0, 32); # all of $buf at 32 bytes into file
+
+  # these two are equivalent
+  pwrite($fh, $buf, 0);
+  pwrite($fh, $buf, length $buf);
 
 =head1 DESCRIPTION
 
-TODO
+This module employs the L<pread(2)> and L<pwrite(2)> system calls to
+perform highly unsavory operations on files. These calls do not update
+the filehandle position reported by C<sysseek($fh,0,1)>, and will
+doubtless cause problems if mixed with any sort of buffered I/O. The
+filehandles used MUST be file-based filehandles, and MUST NOT be
+in-memory filehandles or sockets... look, I warned you.
 
 =head1 EXPORTS
 
+=head2 pread
+
+  pread(FH,BUF,LENGTH)
+  pread(FH,BUF,LENGTH,OFFSET)
+
+FH must be a file handle, BUF a scalar, LENGTH how many bytes to
+read into BUF, and optionally, how far into the filehandle to start
+reading at. The call may throw an exception (e.g. if FH is
+C<undef>), or otherwise will return the number of bytes read, or 0
+if EOF, or -1 on error.
+
+=head2 pwrite
+
+  pwrite(FH,BUF)
+  pwrite(FH,BUF,LENGTH)
+  pwrite(FH,BUF,LENGTH,OFFSET)
+
+FH must be a file handle, BUF a scalar, whose LENGTH will be written, or
+otherwise a specified LENGTH number of bytes (but not beyond those
+present in BUF), optionally at the specified OFFSET in bytes. If LENGTH
+is 0, the contents of BUF will be written. The call may throw an
+exception if FH is C<undef>. The return value is the number of bytes
+written, or -1 on error.
+
+=head1 CAVEATS
+
+Everything mentioned above plus yet more besides.
+
 =head1 SEE ALSO
 
-L<dd(1)>, L<hexdump(1)>, L<pread(2)>, L<pwrite(2)>
+L<dd(1)>, L<hexdump(1)>, L<pread(2)>, L<pwrite(2)> and your backups. You
+have backups, right? Backups are nice.
 
 =head1 AUTHOR
 
