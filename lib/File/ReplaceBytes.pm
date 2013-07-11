@@ -8,9 +8,9 @@ use warnings;
 
 require Exporter;
 our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw/pread pwrite/;
+our @EXPORT_OK = qw/pread pwrite replacebytes/;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 require XSLoader;
 XSLoader::load( 'File::ReplaceBytes', $VERSION );
@@ -26,7 +26,7 @@ File::ReplaceBytes - read or replace arbitrary data in files
 
 =head1 SYNOPSIS
 
-  use File::ReplaceBytes qw(pread pwrite);
+  use File::ReplaceBytes qw(pread pwrite replacebytes);
 
   open my $fh, '+<', $file or die "cannot open $file: $!\n";
 
@@ -42,6 +42,8 @@ File::ReplaceBytes - read or replace arbitrary data in files
   # these two are equivalent
   pwrite($fh, $buf, 0);
   pwrite($fh, $buf, length $buf);
+
+  replacebytes('somefile', $buf, 42);
 
 =head1 DESCRIPTION
 
@@ -72,15 +74,32 @@ if EOF, or -1 on error.
   pwrite(FH,BUF,LENGTH,OFFSET)
 
 FH must be a file handle, BUF a scalar, whose LENGTH will be written, or
-otherwise a specified LENGTH number of bytes (but not beyond those
-present in BUF), optionally at the specified OFFSET in bytes. If LENGTH
-is 0, the contents of BUF will be written. The call may throw an
-exception if FH is C<undef>. The return value is the number of bytes
-written, or -1 on error.
+otherwise a specified LENGTH number of bytes--but not beyond that of
+BUF, because that would be so very naughty--optionally at the specified
+OFFSET in bytes. If LENGTH is 0, the contents of BUF will be written.
+The call may throw an exception if FH is C<undef>. The return value is
+the number of bytes written, or -1 on error.
+
+=head2 replacebytes
+
+  replacebytes(FILENAME,BUF)
+  replacebytes(FILENAME,BUF,OFFSET)
+
+Accepts a filename and scalar buffer, and writes the buffer to the
+specified offset (zero if not specified) in the said file. Does not use
+PerlIO like the C<p*> routines do, instead performs a direct L<open(2)>
+call on the filename.
 
 =head1 CAVEATS
 
 Everything mentioned above plus yet more besides.
+
+=head1 SECURITY CONSIDERATIONS
+
+This module MUST NOT be used if untrusted user input can influence how
+the file handles are created, as who knows what the C<p*> system calls
+will do with whatever C<fileno> value Perl returns for some socket or
+in-memory data filehandle?
 
 =head1 SEE ALSO
 

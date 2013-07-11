@@ -15,7 +15,7 @@ my $deeply = $@ ? \&is_deeply : \&eq_or_diff;
 
 BEGIN { use_ok('File::ReplaceBytes') }
 
-can_ok( 'File::ReplaceBytes', qw/pread pwrite/ );
+can_ok( 'File::ReplaceBytes', qw/pread pwrite replacebytes/ );
 
 ########################################################################
 #
@@ -61,11 +61,9 @@ throws_ok(
 #
 # pwrite
 
-# TODO copy test data to file, then pwrite, then confirm file contents
-# are what expect to see
 open $fh, '+<', 'out' or die "could not write 'out': $!";
 
-my $to_write = "a" x 16;
+my $to_write     = "a" x 16;
 my $write_offset = 8;
 $st = File::ReplaceBytes::pwrite( $fh, $to_write, 0, $write_offset );
 is( $st, length $to_write, 'pwrite some bytes' );
@@ -75,11 +73,27 @@ ok( $at == 0, 'should be no filehandle position change' );
 # TODO might be fs sync problems if pwrite data tardy getting to disk?
 
 open my $readout, '<', 'out' or die "could not read 'out': $!";
-seek($readout, $write_offset, 0);
+seek( $readout, $write_offset, 0 );
 my $written = do { local $/ = undef; readline $readout };
-is($to_write, $written, 'read what expected to write');
+is( $to_write, $written, 'read what expected to write' );
+
+# should be no-ops as nothing to do
+is( File::ReplaceBytes::pwrite( $fh, undef ), 0, 'nothing to do 1' );
+is( File::ReplaceBytes::pwrite( $fh, '' ),    0, 'nothing to do 2' );
 
 # reset
-open $fh, '>', 'out' or die "could not trucate 'out': $!";
+open $fh, '>', 'out' or die "could not truncate 'out': $!";
 
-plan tests => 10;
+$to_write     = "b" x 15;
+$write_offset = 4;
+$st = File::ReplaceBytes::replacebytes( 'out', $to_write, $write_offset );
+is( $st, length $to_write, 'replacebytes some bytes' );
+
+open my $readout, '<', 'out' or die "could not read 'out': $!";
+seek( $readout, $write_offset, 0 );
+$written = do { local $/ = undef; readline $readout };
+is( $to_write, $written, 'read what expected to write' );
+
+open $fh, '>', 'out' or die "could not truncate 'out': $!";
+
+plan tests => 14;

@@ -42,7 +42,7 @@ pwrite(PerlIO *fh, SV *buf, ...)
 
   CODE:
 /* pwrite(2) does not complain if nothing to write, so emulate that */
-    if(!SvOK(buf))
+    if(!SvOK(buf) || SvCUR(buf) == 0)
         XSRETURN_IV(0);
 /* length, offset are optional, but offset demands that length also be
  * set by the caller */
@@ -55,6 +55,27 @@ pwrite(PerlIO *fh, SV *buf, ...)
         len = SvCUR(buf);
 
     RETVAL = pwrite(PerlIO_fileno(fh), SvPV(buf, len), len, offset);
+
+  OUTPUT:
+    RETVAL
+
+int
+replacebytes(SV *filename, SV *buf, ...)
+  PREINIT:
+    unsigned long offset = 0;
+
+  CODE:
+    int fd;
+
+    if(!SvOK(buf) || SvCUR(buf) == 0)
+        XSRETURN_IV(0);
+    if( items > 2 )
+        offset = SvIV(ST(2));
+
+    if((fd = open(SvPV_nolen(filename), O_WRONLY)) == -1)
+        XSRETURN_IV(-1);
+
+    RETVAL = pwrite(fd, SvPV_nolen(buf), SvCUR(buf), offset);
 
   OUTPUT:
     RETVAL
