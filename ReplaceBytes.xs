@@ -8,12 +8,6 @@
 
 #include "ppport.h"
 
-/* TODO figure out TYPEMAP for len, offset and use Off_t or whatnot
- * for those? */
-
-/* TODO figure out pTHX_ to support threads enabled? get "Could not find
- * a typemap for C type 'pTHX_ PerlIO ..." if prefix that macro. */
-
 MODULE = File::ReplaceBytes             PACKAGE = File::ReplaceBytes            
 
 long
