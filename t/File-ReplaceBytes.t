@@ -40,6 +40,16 @@ $buf = undef;
 $st = File::ReplaceBytes::pread( $fh, $buf, 7, 6 );
 $deeply->( [ $buf, $st ], [ 'aabbbbb', 7 ], 'read into undef scalar' );
 
+$st = File::ReplaceBytes::pread( $fh, $buf, -1, 0 );
+is( $st, -1, 'pread negative len' );
+
+$st = File::ReplaceBytes::pread( $fh, $buf, 8, -1 );
+is( $st, -1, 'pread negative offset' );
+
+$buf = undef;
+$st = File::ReplaceBytes::pread( $fh, $buf, 0, 0 );
+ok( $st == 0 && !defined $buf, 'pread zero read' );
+
 undef $fh;
 $buf = '';
 throws_ok(
@@ -81,6 +91,12 @@ is( $to_write, $written, 'read what expected to write' );
 is( File::ReplaceBytes::pwrite( $fh, undef ), 0, 'nothing to do 1' );
 is( File::ReplaceBytes::pwrite( $fh, '' ),    0, 'nothing to do 2' );
 
+$st = File::ReplaceBytes::pwrite( $fh, "cat", -1 );
+is( $st, -1, 'pwrite negative len' );
+
+$st = File::ReplaceBytes::pwrite( $fh, "cat", 0, -1 );
+is( $st, -1, 'pwrite negative offset' );
+
 # reset
 open $fh, '>', 'out' or die "could not truncate 'out': $!";
 
@@ -89,11 +105,11 @@ $write_offset = 4;
 $st = File::ReplaceBytes::replacebytes( 'out', $to_write, $write_offset );
 is( $st, length $to_write, 'replacebytes some bytes' );
 
-open my $readout, '<', 'out' or die "could not read 'out': $!";
+open $readout, '<', 'out' or die "could not read 'out': $!";
 seek( $readout, $write_offset, 0 );
 $written = do { local $/ = undef; readline $readout };
 is( $to_write, $written, 'read what expected to write' );
 
 open $fh, '>', 'out' or die "could not truncate 'out': $!";
 
-plan tests => 14;
+plan tests => 19;
