@@ -41,6 +41,7 @@ pread(PerlIO *fh, SV *buf, ...)
 
     RETVAL = pread(PerlIO_fileno(fh), SvGROW(buf, len), len, offset);
     SvCUR_set(buf, len);
+    SvTAINTED_on(buf);
 
   OUTPUT:
     buf
