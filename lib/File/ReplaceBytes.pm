@@ -15,7 +15,7 @@ our $VERSION = '0.04';
 require XSLoader;
 XSLoader::load( 'File::ReplaceBytes', $VERSION );
 
-# see *.xs for the code
+# see ReplaceBytes.xs for the code
 
 1;
 __END__
@@ -61,11 +61,11 @@ in-memory filehandles or sockets... look, I warned you.
   pread(FH,BUF,LENGTH)
   pread(FH,BUF,LENGTH,OFFSET)
 
-FH must be a file handle, BUF a scalar, LENGTH how many bytes to
-read into BUF, and optionally, how far into the filehandle to start
-reading at. The call may throw an exception (e.g. if FH is
-C<undef>), or otherwise will return the number of bytes read, or 0
-if EOF, or -1 on error.
+FH must be a file handle, BUF a scalar, LENGTH how many bytes to read
+into BUF, and optionally, how far into the filehandle to start reading
+at. The call may throw an exception (e.g. if FH is C<undef>), or
+otherwise will return the number of bytes read, or 0 if EOF, or -1 on
+error. BUF will be tainted under taint mode.
 
 =head2 pwrite
 
