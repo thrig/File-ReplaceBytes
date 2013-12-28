@@ -10,7 +10,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw/pread pwrite replacebytes/;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 require XSLoader;
 XSLoader::load( 'File::ReplaceBytes', $VERSION );
@@ -25,6 +25,8 @@ __END__
 File::ReplaceBytes - read or replace arbitrary data in files
 
 =head1 SYNOPSIS
+
+Warning! These system calls are dangerous!
 
   use File::ReplaceBytes qw(pread pwrite replacebytes);
 
@@ -52,7 +54,7 @@ perform highly unsavory operations on files. These calls do not update
 the filehandle position reported by C<sysseek($fh,0,1)>, and will
 doubtless cause problems if mixed with any sort of buffered I/O. The
 filehandles used MUST be file-based filehandles, and MUST NOT be
-in-memory filehandles or sockets... look, I warned you.
+in-memory filehandles or sockets...look, I warned you.
 
 =head1 EXPORTS
 
