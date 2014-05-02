@@ -53,4 +53,4 @@ if ( $ExtUtils::MakeMaker::VERSION ge '6.48' ) {
   $params{BUILD_REQUIRES} = { 'Test::More' => 0, 'Test::Exception' => 0 };
 }
 
-WriteMakefile(%params);
+WriteMakefile((MM->can('signature_target') ? (SIGN => 1) : ()), %params);
