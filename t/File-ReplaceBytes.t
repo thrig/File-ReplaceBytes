@@ -21,7 +21,7 @@ can_ok( 'File::ReplaceBytes', qw/pread pwrite replacebytes/ );
 #
 # pread
 
-open my $fh, '<', 't/testdata' or die "could not read t/testdata: $!";
+open my $fh, '<', 't/testdata' or die "could not read t/testdata: $!\n";
 
 my $buf = '';
 my $st = File::ReplaceBytes::pread( $fh, $buf, 8, 8 );
@@ -71,7 +71,7 @@ throws_ok(
 #
 # pwrite
 
-open $fh, '+<', 'out' or die "could not write 'out': $!";
+open $fh, '+<', 'out' or die "could not write 'out': $!\n";
 
 my $to_write     = "a" x 16;
 my $write_offset = 8;
@@ -82,7 +82,7 @@ ok( $at == 0, 'should be no filehandle position change' );
 
 # TODO might be fs sync problems if pwrite data tardy getting to disk?
 
-open my $readout, '<', 'out' or die "could not read 'out': $!";
+open my $readout, '<', 'out' or die "could not read 'out': $!\n";
 seek( $readout, $write_offset, 0 );
 my $written = do { local $/ = undef; readline $readout };
 is( $to_write, $written, 'read what expected to write' );
@@ -98,18 +98,18 @@ $st = File::ReplaceBytes::pwrite( $fh, "cat", 0, -1 );
 is( $st, -1, 'pwrite negative offset' );
 
 # reset
-open $fh, '>', 'out' or die "could not truncate 'out': $!";
+open $fh, '>', 'out' or die "could not truncate 'out': $!\n";
 
 $to_write     = "b" x 15;
 $write_offset = 4;
 $st = File::ReplaceBytes::replacebytes( 'out', $to_write, $write_offset );
 is( $st, length $to_write, 'replacebytes some bytes' );
 
-open $readout, '<', 'out' or die "could not read 'out': $!";
+open $readout, '<', 'out' or die "could not read 'out': $!\n";
 seek( $readout, $write_offset, 0 );
 $written = do { local $/ = undef; readline $readout };
 is( $to_write, $written, 'read what expected to write' );
 
-open $fh, '>', 'out' or die "could not truncate 'out': $!";
+open $fh, '>', 'out' or die "could not truncate 'out': $!\n";
 
 plan tests => 19;
