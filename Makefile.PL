@@ -1,56 +1,76 @@
-#!perl
-
-use 5.010000;
+use 5.006;
 
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
 # TODO no idea if pread/pwrite available, maybe if someone has the time
-# and can provide patches...
+# and can provide patches... TODO there's also a dist check module, but
+# alas I am off the Internet so cannot lookup the exact name nor use it
 if ( $^O =~ m/MSWin32/ ) {
-  print "Sorry, no automated install is available on Windows.\n";
-  exit(0);
+    print "Sorry, no automated install is available on Windows.\n";
+    exit(0);
+}
+
+# I think you know where this was stolen from by now
+sub merge_key_into {
+    my ( $href, $target, $source ) = @_;
+    %{ $href->{$target} } = ( %{ $href->{$target} }, %{ delete $href->{$source} } );
 }
 
 my %params = (
-  NAME         => 'File::ReplaceBytes',
-  VERSION_FROM => 'lib/File/ReplaceBytes.pm',
-  PREREQ_PM    => {},
-  ( $] >= 5.005
-    ? (
-      ABSTRACT_FROM => 'lib/File/ReplaceBytes.pm',
-      AUTHOR        => 'Jeremy Mates <jmates@cpan.org>'
-      )
-    : ()
-  ),
-  LIBS   => [''],     # e.g., '-lm'
-  DEFINE => '',       # e.g., '-DHAVE_SOMETHING'
-  INC    => '-I.',    # e.g., '-I. -I/usr/include/other'
-                      # Un-comment this if you add C files to link with later:
-       # OBJECT            => '$(O_FILES)', # link all the C files too
+    NAME         => 'File::ReplaceBytes',
+    ABSTRACT     => 'read or replace arbitrary data in files',
+    AUTHOR       => 'Jeremy Mates <jmates@cpan.org>',
+    VERSION_FROM => 'lib/File/ReplaceBytes.pm',
+
+    LICENSE  => 'artistic_2',
+    PL_FILES => {},
+
+    CONFIGURE_REQUIRES => {
+        'strict'              => 0,
+        'ExtUtils::MakeMaker' => '6.48',
+    },
+    BUILD_REQUIRES => {},
+    TEST_REQUIRES  => {
+        'lib'        => 0,
+        'Test::Most' => 0,
+    },
+    PREREQ_PM => { 'strict' => 0, },
+
+    META_MERGE => {
+        'meta-spec'         => { version => 2 },
+        'homepageresources' => {
+            repository => {
+                url  => 'git://github.com/thrig/File-ReplaceBytes.git',
+                web  => 'https://github.com/thrig/File-ReplaceBytes',
+                type => 'git',
+            },
+        },
+    },
 );
 
-if ( $ExtUtils::MakeMaker::VERSION =~ /^\d\.\d\d$/ and $ExtUtils::MakeMaker::VERSION > 6.30 ) {
-  $params{LICENSE} = 'artistic_2';
+(   my $mm_version = ExtUtils::MakeMaker->VERSION(
+        $params{CONFIGURE_REQUIRES}{'ExtUtils::MakeMaker'}
+    )
+) =~ tr/_//d;
+
+if ( $mm_version < 6.67_04 ) {
+    # Why? For the glory of APUE!
+    *ExtUtils::MM_Any::_add_requirements_to_meta_v1_4 =
+      \&ExtUtils::MM_Any::_add_requirements_to_meta_v2;
 }
 
-if ( $ExtUtils::MakeMaker::VERSION ge '6.46' ) {
-  $params{META_MERGE} = {
-    resources => {
-      homepage   => 'http://github.com/thrig/File-ReplaceBytes',
-      license    => 'http://dev.perl.org/licenses/',
-      repository => 'http://github.com/thrig/File-ReplaceBytes',
-    }
-  };
+if ( $mm_version < 6.63_03 ) {
+    merge_key_into \%params, 'BUILD_REQUIRES', 'TEST_REQUIRES';
 }
 
-if ( $ExtUtils::MakeMaker::VERSION ge '6.48' ) {
-  $params{MIN_PERL_VERSION} = 5.010000;
-  # TODO when was this added? or do the mauke method and build
-  # everything but only subtract things for legacy ExtUtils::MakeMaker
-  # support?
-  $params{BUILD_REQUIRES} = { 'Test::More' => 0, 'Test::Exception' => 0 };
+if ( $mm_version < 6.55_01 ) {
+    merge_key_into \%params, 'CONFIGURE_REQUIRES', 'BUILD_REQUIRES';
 }
 
-WriteMakefile((MM->can('signature_target') ? (SIGN => 1) : ()), %params);
+if ( $mm_version < 6.51_03 ) {
+    merge_key_into \%params, 'PREREQ_PM', 'CONFIGURE_REQUIRES';
+}
+
+WriteMakefile( ( MM->can('signature_target') ? ( SIGN => 1 ) : () ), %params );

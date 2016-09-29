@@ -6,4 +6,5 @@ Makefile.old
 ReplaceBytes.bs
 ReplaceBytes.c
 blib
+out
 pm_to_blib

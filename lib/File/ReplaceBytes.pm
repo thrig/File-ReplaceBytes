@@ -10,7 +10,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw/pread pwrite replacebytes/;
 
-our $VERSION = '0.08';
+our $VERSION = '1.00';
 
 require XSLoader;
 XSLoader::load( 'File::ReplaceBytes', $VERSION );
@@ -26,7 +26,7 @@ File::ReplaceBytes - read or replace arbitrary data in files
 
 =head1 SYNOPSIS
 
-Warning! These system calls are dangerous!
+Warning! These system calls are dangerous! Warning!
 
   use File::ReplaceBytes qw(pread pwrite replacebytes);
 
@@ -65,9 +65,11 @@ in-memory filehandles or sockets...look, I warned you.
 
 FH must be a file handle, BUF a scalar, LENGTH how many bytes to read
 into BUF, and optionally, how far into the filehandle to start reading
-at. The call may throw an exception (e.g. if FH is C<undef>), or
-otherwise will return the number of bytes read, or 0 if EOF, or -1 on
-error. BUF will be tainted under taint mode.
+at. BUF will be tainted under taint mode. The call may throw an
+exception (e.g. if FH is C<undef>), or otherwise will return the number
+of bytes read, or 0 on EOF, or -1 on error. L<perlvar/"$!"> may contain
+a clue as to why the call errored out; reasons include invalid input
+(negative offsets) or a failure from L<pread(2)>.
 
 =head2 pwrite
 
@@ -80,7 +82,9 @@ otherwise a specified LENGTH number of bytes--but not beyond that of
 BUF, because that would be so very naughty--optionally at the specified
 OFFSET in bytes. If LENGTH is 0, the contents of BUF will be written.
 The call may throw an exception if FH is C<undef>. The return value is
-the number of bytes written, or -1 on error.
+the number of bytes written, or -1 on error. L<perlvar/"$!"> may contain
+a clue as to why the call errored out; reasons include invalid input
+(negative offsets) or a failure from L<pwrite(2)>.
 
 =head2 replacebytes
 
@@ -88,9 +92,13 @@ the number of bytes written, or -1 on error.
   replacebytes(FILENAME,BUF,OFFSET)
 
 Accepts a filename and scalar buffer, and writes the buffer to the
-specified offset (zero if not specified) in the said file. Does not use
-PerlIO like the C<p*> routines do, instead performs a direct L<open(2)>
-call on the filename.
+specified offset (zero if not specified) in the specified file. Will
+create the file if it does not exist. Does not use PerlIO like the C<p*>
+routines do, instead performs a direct L<open(2)> call on the filename.
+The return value is the number of bytes written, or -1 on error.
+L<perlvar/"$!"> may contain a clue as to why the call errored out;
+reasons include invalid input (negative offsets) or a failure from
+L<open(2)> or L<pwrite(2)>.
 
 =head1 CAVEATS
 
@@ -114,7 +122,7 @@ thrig - Jeremy Mates (cpan:JMATES) C<< <jmates at cpan.org> >>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2013-2015 by Jeremy Mates
+Copyright (C) 2013-2016 by Jeremy Mates
 
 This module is free software; you can redistribute it and/or modify it
 under the Artistic License (2.0).
