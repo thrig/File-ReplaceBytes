@@ -10,3 +10,4 @@ t/00-load.t
 t/File-ReplaceBytes.t
 t/pod.t
 t/testdata
+t/tie-me-up.t
